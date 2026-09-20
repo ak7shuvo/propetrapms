@@ -61,11 +61,15 @@ export default function ReservationsPage() {
     }
   }
 
+  const [pulsedId, setPulsedId] = useState<string | null>(null);
+
   async function handleStatus(res: Reservation, status: Reservation['status']) {
     const prev = reservations;
     setReservations((rs) => rs && rs.map((r) => (r.id === res.id ? { ...r, status } : r)));
     try {
       await updateReservation(hotel.id, res.id, { status });
+      setPulsedId(res.id);
+      setTimeout(() => setPulsedId((id) => (id === res.id ? null : id)), 650);
     } catch (err: any) {
       setReservations(prev ?? null);
       setFormError(err?.message ?? 'Could not update reservation status.');
@@ -123,7 +127,7 @@ export default function ReservationsPage() {
                 <thead><tr><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th></tr></thead>
                 <tbody>
                   {filtered.map((r) => (
-                    <tr key={r.id}>
+                    <tr key={r.id} className={pulsedId === r.id ? 'row-pulse' : ''}>
                       <td>{r.guest.firstName} {r.guest.lastName}</td>
                       <td className="td-numeric">{r.room.number}</td>
                       <td className="td-numeric">{r.checkInDate}</td>

@@ -61,11 +61,15 @@ export default function RoomsPage() {
     }
   }
 
+  const [pulsedId, setPulsedId] = useState<string | null>(null);
+
   async function handleStatusChange(room: Room, status: Room['status']) {
     const prev = rooms;
     setRooms((rs) => rs && rs.map((r) => (r.id === room.id ? { ...r, status } : r)));
     try {
       await updateRoom(hotel.id, room.id, { status });
+      setPulsedId(room.id);
+      setTimeout(() => setPulsedId((id) => (id === room.id ? null : id)), 650);
     } catch (err: any) {
       setRooms(prev ?? null);
       setFormError(err?.message ?? 'Could not update room status.');
@@ -141,7 +145,7 @@ export default function RoomsPage() {
                 </thead>
                 <tbody>
                   {filtered.map((r) => (
-                    <tr key={r.id}>
+                    <tr key={r.id} className={pulsedId === r.id ? 'row-pulse' : ''}>
                       <td className="td-numeric">{r.number}</td>
                       <td className="td-numeric">{r.floor ?? '—'}</td>
                       <td>{r.roomType.name}</td>

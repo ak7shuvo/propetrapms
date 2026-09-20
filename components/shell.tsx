@@ -51,11 +51,24 @@ export function Shell({ user, hotelName, children }: { user: User; hotelName?: s
   const pathname = usePathname();
   const { logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const [indicator, setIndicator] = useState<{ top: number; height: number } | null>(null);
 
   const active = ALL_NAV.find((item) => pathname === item.href);
   const closeMobile = () => setMobileOpen(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('petrapms_sidebar_collapsed');
+    if (stored === '1') setCollapsed(true);
+  }, []);
+
+  function toggleCollapsed() {
+    setCollapsed((c) => {
+      localStorage.setItem('petrapms_sidebar_collapsed', c ? '0' : '1');
+      return !c;
+    });
+  }
 
   useEffect(() => {
     const container = navRef.current;
@@ -64,7 +77,7 @@ export function Shell({ user, hotelName, children }: { user: User; hotelName?: s
     if (activeEl) {
       setIndicator({ top: activeEl.offsetTop, height: activeEl.offsetHeight });
     }
-  }, [pathname]);
+  }, [pathname, collapsed]);
 
   return (
     <div className="app-shell">
@@ -80,7 +93,7 @@ export function Shell({ user, hotelName, children }: { user: User; hotelName?: s
 
       {mobileOpen && <div className="sidebar-scrim" onClick={closeMobile} aria-hidden />}
 
-      <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
+      <aside className={`sidebar ${mobileOpen ? 'open' : ''} ${collapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-top">
           <div className="brand">
             <div className="brand-mark">P</div>
@@ -89,6 +102,15 @@ export function Shell({ user, hotelName, children }: { user: User; hotelName?: s
               <span>PMS</span>
             </div>
           </div>
+          <button
+            type="button"
+            className="sidebar-collapse-btn"
+            onClick={toggleCollapsed}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? '»' : '«'}
+          </button>
           <button type="button" className="mobile-nav-close" onClick={closeMobile} aria-label="Close navigation">×</button>
         </div>
 
